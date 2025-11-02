@@ -1,17 +1,6 @@
 # EMSE Wintersemester 2025
 
-Das ist das Default-Projekt für das eigene Experiment. In dem Experiment werden die Zeilen
-
-
-    "Hello, world + random number: " + irgendeine Zufallszahl von 0-9<br>
-    Hier eine zusätzliche HTML Zeile
-
-oder die Zeile
-
-    "Exit world + random number: " + irgendeine Zufallszahl von 0-9
-  
-ausgegeben. Wenn Hello, word angezeigt wird, soll die Taste [1] gedrückt werden,
-ansonsten die Taste 2.
+In dem Experiment wird eine zufällige Zeichenkette erzeugt, wovon 1 Zeichen entweder unterstrichen (=1 drücken) oder blau eingefärbt wird (=2 drücken)
 
 - Das File "experimentation_lib.js" ist die verwendete Library. Diese muss nicht angefasst werden.
 
