@@ -101,6 +101,7 @@ let experiment_configuration_function = (writer) => { return {
             const text = makeRandomString();
             const hlIndex = Nof1.new_random_integer(STR_LEN);
 
+
             const spans = [];
             for (let i = 0; i < text.length; i++) {
                 const ch = text[i];
