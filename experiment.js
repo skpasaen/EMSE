@@ -24,9 +24,6 @@ let experiment_configuration_function = (writer) => { return {
     experiment_name: "TestExperiment",
     seed: SEED,
 
-    variables: [
-        { variable: "Highlighting", treatments: ["off", "on"] }
-    ],
 
     introduction_pages: writer.stage_string_pages_commands([
         writer.convert_string_to_html_string(
@@ -52,7 +49,7 @@ let experiment_configuration_function = (writer) => { return {
 
     layout: [
         { variable: "Style", treatments: ["none", "underline", "blue"] },
-        {variable: "MarkedLength", treatments: [1, 2, 3]}
+        {variable: "MarkedLength", treatments: [1, 3, 5]}
     ],
 
     repetitions: 5,
@@ -65,13 +62,13 @@ let experiment_configuration_function = (writer) => { return {
             writer.clear_stage();
 
 
-            const condition    = task.treatment_combination.treatment_combination[0].value; // "none"|"underline"|"blue"
+            const style    = task.treatment_combination.treatment_combination[0].value; // "none"|"underline"|"blue"
             const markedLength = parseInt(task.treatment_combination.treatment_combination[1].value); // 1|2|3
 
             const text = makeRandomString();
 
             let hlIndex = 0;
-            if (condition !== "none") {
+            if (style !== "none") {
                 const maxStart = STR_LEN - markedLength; // inklusiv
                 hlIndex = Nof1.new_random_integer(maxStart + 1);
             }
@@ -80,8 +77,8 @@ let experiment_configuration_function = (writer) => { return {
             for (let i = 0; i < text.length; i++) {
                 const ch = text[i];
 
-                if (condition !== "none" && i >= hlIndex && i < hlIndex + markedLength) {
-                    const cls = (condition === "underline") ? "hl-underline" : "hl-blue";
+                if (style !== "none" && i >= hlIndex && i < hlIndex + markedLength) {
+                    const cls = (style === "underline") ? "hl-underline" : "hl-blue";
                     spans.push(`<span class="${cls}">${ch}</span>`);
                 } else {
                     spans.push(`<span>${ch}</span>`);
@@ -98,10 +95,10 @@ let experiment_configuration_function = (writer) => { return {
         `);
 
 
-            task.expected_answer = expectedKeyFor(condition);
+            task.expected_answer = expectedKeyFor(style);
 
 
-            task.current_condition     = condition;
+            task.current_style     = style;
             task.current_markedLength  = markedLength;
             task.current_hlIndex       = hlIndex;
             task.current_text          = text;
