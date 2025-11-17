@@ -1,7 +1,7 @@
 let SEED = "666";
 Nof1.SET_SEED(SEED);
 const CHARSET = "abcdefghijklmnopqrstuvwxyz0123456789";
-const STR_LEN = 12;
+const STR_LEN = 150;
 
 function makeRandomString(len = STR_LEN) {
     let s = "";
@@ -51,8 +51,8 @@ let experiment_configuration_function = (writer) => { return {
     ],
 
     layout: [
-        { variable: "Highlighting", treatments: ["off", "on"] },
-        { variable: "Style",        treatments: ["underline", "blue"] }
+        { variable: "Style", treatments: ["none", "underline", "blue"] },
+        {variable: "MarkedLength", treatments: [1, 2, 3]}
     ],
 
     repetitions: 5,
@@ -64,24 +64,24 @@ let experiment_configuration_function = (writer) => { return {
         task.do_print_task = () => {
             writer.clear_stage();
 
-            const highlighting = task.treatment_combination.treatment_combination[0].value;
-            const stylePlan    = task.treatment_combination.treatment_combination[1].value;
-            const styleEff = (highlighting === "on") ? stylePlan : "none";
-            task.set_computed_variable_value("Style", styleEff);
+
+            const condition    = task.treatment_combination.treatment_combination[0].value; // "none"|"underline"|"blue"
+            const markedLength = parseInt(task.treatment_combination.treatment_combination[1].value); // 1|2|3
+
             const text = makeRandomString();
 
-            const hlIndex = Nof1.new_random_integer(STR_LEN);
-
-            let styleName = "none";
-            if (highlighting === "on") {
-                styleName = (Nof1.new_random_integer(2) === 0) ? "underline" : "blue";
+            let hlIndex = 0;
+            if (condition !== "none") {
+                const maxStart = STR_LEN - markedLength; // inklusiv
+                hlIndex = Nof1.new_random_integer(maxStart + 1);
             }
 
             const spans = [];
             for (let i = 0; i < text.length; i++) {
                 const ch = text[i];
-                if (highlighting === "on" && i === hlIndex) {
-                    const cls = styleName === "underline" ? "hl-underline" : "hl-blue";
+
+                if (condition !== "none" && i >= hlIndex && i < hlIndex + markedLength) {
+                    const cls = (condition === "underline") ? "hl-underline" : "hl-blue";
                     spans.push(`<span class="${cls}">${ch}</span>`);
                 } else {
                     spans.push(`<span>${ch}</span>`);
@@ -89,36 +89,40 @@ let experiment_configuration_function = (writer) => { return {
             }
 
             writer.print_html_on_stage(`
-        <div style="font-family:sans-serif;font-size:100%;">${spans.join("")}</div>
-        <div style="margin-top:12px;font-size:90%;">
-          [1] kein Highlight &nbsp; | &nbsp; [2] <u>unterstrichen</u> &nbsp; | &nbsp; [3] <span style="color:blue;">blau</span>
-        </div>
-      `);
+            <div style="font-family:sans-serif;font-size:100%;">${spans.join("")}</div>
+            <div style="margin-top:12px;font-size:90%;">
+                [1] kein Highlight &nbsp; | &nbsp;
+                [2] <u>unterstrichen</u> &nbsp; | &nbsp;
+                [3] <span style="color:blue;">blau</span>
+            </div>
+        `);
 
 
-            task.expected_answer = expectedKeyFor(styleName);
+            task.expected_answer = expectedKeyFor(condition);
 
 
-            task.current_text = text;
-            task.current_hlIndex = hlIndex;
-            task.current_highlighting = highlighting;
-            task.current_style_effective = styleEff;
+            task.current_condition     = condition;
+            task.current_markedLength  = markedLength;
+            task.current_hlIndex       = hlIndex;
+            task.current_text          = text;
         };
 
-
-        task.accepts_answer_function = (answer) => (answer === "1" || answer === "2" || answer === "3");
+        // 1/2/3 sind gültige Antworten
+        task.accepts_answer_function = (answer) =>
+            (answer === "1" || answer === "2" || answer === "3");
 
         task.do_print_error_message = () => {
             writer.print_error_string_on_stage(
-                writer.convert_string_to_html_string("Falsch. Bitte probiere die andere Option."));
-        }
+                writer.convert_string_to_html_string("Falsch. Bitte probiere eine andere Taste."));
+        };
 
         task.do_print_after_task_information = () => {
             writer.clear_stage();
             writer.print_html_on_stage(
                 writer.convert_string_to_html_string("Richtig. [Enter] für den nächsten Durchgang."));
-        }
+        };
     }
+
 }};
 
 Nof1.BROWSER_EXPERIMENT(experiment_configuration_function);
